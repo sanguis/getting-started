@@ -7,6 +7,7 @@ into depth, it covers the following topics:
 - running your first minikube cluster
 - adding AWS registries
 - adding ingress addon
+- switching from docker desktop to minikubes docker engine
 - Running your first container
 - Building containers
 - Learning what containers are running and removing them
@@ -49,31 +50,83 @@ minikube addons enable registry
 minikube addons enable ingress
 ```
 
+### switching from docker desktop to minikubes docker engine
+
+No docker desktop is needed to use mini kube however you will need tjhe docker cli.
+
+on mac
+```
+brew install docker
+```
+
+swap out the env
+```
+eval $(minikube -p minikube docker-env)
+```
+
+### the kube dashboard
+
+This is a local step. there have been numerous instances of this being used as an entry point for hacking into a production system but its nice for local work.
+
+```
+minikube dashboard
+```
+
 ### Running your first container
+
+This will call a remote hello world container and expose it so you can see it.
+
+1. Create a Deployment using the following command:
+
+    ```shell
+    kubectl create deployment web --image=gcr.io/google-samples/hello-app:1.0
+    ```
+
+    Output:
+
+    ```shell
+    deployment.apps/web created
+    ```
+
+1. Expose the Deployment:
+
+    ```shell
+    kubectl expose deployment web --type=NodePort --port=8080
+    ```
+
+    Output:
+
+    ```shell
+    service/web exposed
+    ```
+
+1. Verify the Service is created and is available on a node port:
+
+    ```shell
+    kubectl get service web
+    ```
+
+    Output:
+
+    ```shell
+    NAME      TYPE       CLUSTER-IP       EXTERNAL-IP   PORT(S)          AGE
+    web       NodePort   10.104.133.249   <none>        8080:31637/TCP   12m
+    ```
+
+1. Visit the service via NodePort:
+
+    ```shell
+    minikube service web --url
+    ```
+
+    Output:
+
+    ```shell
+    http://172.17.0.15:31637
+    ```
 
 
 ### Building containers
-### Learning what containers are running and removing them
-### Using volumes to persist data
-### Using bind mounts to support development
-### Using container networking to support multi-container applications
-### Converting from Docker Compose with `kompose`
-### Using image layer caching to speed up builds and reduce push/pull size
-### Using multi-stage builds to separate build-time and runtime dependencies
-
-## Development
-
-This project has a `docker-compose.yml` file, which will start the mkdocs application on your
-local machine and help you see changes instantly.
-
-```bash
-docker-compose up
 ```
-
-## Contributing
-
-If you find typos or other issues with the tutorial, feel free to create a PR and suggest fixes!
-
-If you have ideas on how to make the tutorial better or new content, please open an issue first before working on your idea. While we love input, we want to keep the tutorial  scoped to newcomers.
-As such, we may reject ideas for more advanced requests and don't want you to lose any work you might
-have done. So, ask first and we'll gladly hear your thoughts!
+minikube build ngnix-demo/ -t nginx-demo
+```
