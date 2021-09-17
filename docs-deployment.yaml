@@ -1,0 +1,82 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.24.0 (HEAD)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: minikube-demo
+  name: minikube-demo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: minikube-demo
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert
+        kompose.version: 1.24.0 (HEAD)
+      creationTimestamp: null
+      labels:
+        io.kompose.service: minikube-demo
+    spec:
+      containers:
+        - image: localhost:5000/minikube-demo
+          name: minikube-demo
+          ports:
+            - containerPort: 8000
+          resources: {}
+          volumeMounts:
+            - mountPath: /app
+              name: minikube-demo-claim0
+      restartPolicy: Always
+      volumes:
+        - name: minikube-demo-claim0
+          persistentVolumeClaim:
+            claimName: minikube-demo-claim0
+status: {}
+
+---
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  creationTimestamp: null
+  labels:
+    io.kompose.service: minikube-demo-claim0
+  name: minikube-demo-claim0
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 100Mi
+status: {}
+
+---
+
+
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.24.0 (HEAD)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: minikube-demo
+  name: minikube-demo
+spec:
+  type: NodePort
+  ports:
+    - name: "8000"
+      port: 8000
+      targetPort: 8000
+  selector:
+    io.kompose.service: minikube-demo
+status:
+  loadBalancer: {}
